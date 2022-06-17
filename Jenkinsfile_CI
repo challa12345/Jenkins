@@ -1,0 +1,22 @@
+pipeline {
+  agent any
+  stages {
+     stage ('checkout'){
+       steps {
+       checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/koddas/war-web-project.git']]])
+     }
+     }
+     stage ('build') {
+       steps {
+         sh 'mvn package'
+       }
+    
+     }
+     stage ('upload') {
+      steps {
+        nexusArtifactUploader artifacts: [[artifactId: 'ram', classifier: '', file: 'target/wwp-1.0.0.war', type: 'war']], credentialsId: 'Nexus', groupId: 'ram', nexusUrl: '13.234.122.56:8081/nexus', nexusVersion: 'nexus2', protocol: 'http', repository: 'java', version: '1.$BUILD_NUMBER'
+      }
+    }
+     
+   }
+}
